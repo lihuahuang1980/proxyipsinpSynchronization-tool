@@ -284,10 +284,15 @@ def main():
         else:
             print(f"\nSkipping Cloudflare DNS Sync for {region} (Missing Credentials).")
                 
+    # ===== 这里就是你要改的地方（主域名汇总同步）=====
+    # 现在的主域名同步会把你所有地区的最优 IP 全量推上去（所以主域名会有很多条）
+    # 改成只保留全地区里最快的 MAIN_SYNC_COUNT 个（默认 2）
+    main_sync_count = int(os.environ.get("MAIN_SYNC_COUNT", 2))
     if can_sync and all_best_ips:
         all_best_ips.sort(key=lambda x: x["latency"])
-        print(f"\n[Global Sync] Starting Cloudflare DNS Sync for MAIN DOMAIN: {base_domain}")
-        sync_to_cloudflare(api_token, zone_id, base_domain, all_best_ips, cf_email)
+        main_ips = all_best_ips[:main_sync_count]
+        print(f"\n[Global Sync] Syncing top {len(main_ips)} fastest IPs to MAIN DOMAIN: {base_domain}")
+        sync_to_cloudflare(api_token, zone_id, base_domain, main_ips, cf_email)
 
     if total_found == 0:
         print("No valid IPs found in this scan across any regions. Aborting.")
