@@ -14,10 +14,10 @@ jobs:
       contents: write
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5   # ✅ 原 v4，升级以消除 Node20 警告
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6   # ✅ 原 v5，升级以消除 Node20 警告
         with:
           python-version: '3.10'
 
@@ -33,6 +33,7 @@ jobs:
           CF_EMAIL: ${{ secrets.CF_EMAIL }}
           SYNC_COUNT: '5' # Number of IPs to keep in DNS
           SCAN_COUNT: '1000' # Number of IPs to test per run
+          MAIN_SYNC_COUNT: '2'   # ✅ 新增：主域名只保留最快 2 条 A 记录
         run: python scripts/cf_scanner_sync.py
 
       - name: Commit and Push IP Log
